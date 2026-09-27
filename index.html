@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport"
+        content="width=device-width, initial-scale=1.0">
+
+  <title>Leitor Feijoada</title>
+
+  <script src="https://unpkg.com/html5-qrcode"
+          type="text/javascript"></script>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      padding: 20px;
+      font-family: Arial, sans-serif;
+      background: #f4f4f5;
+      color: #18181b;
+    }
+
+    .container {
+      max-width: 520px;
+      margin: auto;
+    }
+
+    h1 {
+      text-align: center;
+      color: #166534;
+      margin-bottom: 5px;
+    }
+
+    .sub {
+      text-align: center;
+      color: #52525b;
+      margin-bottom: 20px;
+    }
+
+    .card {
+      background: white;
+      padding: 16px;
+      border-radius: 16px;
+      box-shadow: 0 2px 12px #00000015;
+      margin-bottom: 15px;
+    }
+
+    button {
+      width: 100%;
+      padding: 17px;
+      border: 0;
+      border-radius: 12px;
+      background: #166534;
+      color: white;
+      font-size: 19px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    #reader {
+      width: 100%;
+      margin-top: 15px;
+      overflow: hidden;
+      border-radius: 12px;
+    }
+
+    #mensagem {
+      text-align: center;
+      margin-top: 15px;
+      line-height: 1.5;
+    }
+
+    #resultado {
+      display: none;
+      margin-top: 15px;
+      padding: 18px;
+      background: #dcfce7;
+      color: #166534;
+      border-radius: 12px;
+      font-size: 17px;
+      word-break: break-word;
+    }
+
+    #resultado strong {
+      display: block;
+      font-size: 21px;
+      margin-bottom: 10px;
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="container">
+
+  <h1>FEIJOADA</h1>
+
+  <div class="sub">
+    Teste do leitor de QR
+  </div>
+
+  <div class="card">
+
+    <button id="botao" onclick="abrirCamera()">
+      📷 ABRIR CÂMERA
+    </button>
+
+    <div id="reader"></div>
+
+    <div id="mensagem">
+      Toque em ABRIR CÂMERA.
+    </div>
+
+    <div id="resultado">
+      <strong>QR LIDO COM SUCESSO</strong>
+      <span id="conteudo"></span>
+    </div>
+
+  </div>
+
+</div>
+
+
+<script>
+
+let leitor = null;
+let lendo = false;
+
+
+function abrirCamera() {
+
+  if (lendo) {
+    return;
+  }
+
+  const botao =
+    document.getElementById("botao");
+
+  const mensagem =
+    document.getElementById("mensagem");
+
+
+  botao.disabled = true;
+
+  botao.textContent =
+    "ABRINDO CÂMERA...";
+
+
+  mensagem.textContent =
+    "Se o navegador solicitar acesso à câmera, toque em PERMITIR.";
+
+
+  leitor =
+    new Html5Qrcode("reader");
+
+
+  leitor.start(
+
+    {
+      facingMode: "environment"
+    },
+
+    {
+      fps: 10,
+
+      qrbox: {
+        width: 250,
+        height: 250
+      }
+    },
+
+    function(texto) {
+
+      if (lendo) {
+        return;
+      }
+
+
+      lendo = true;
+
+
+      if (navigator.vibrate) {
+        navigator.vibrate(100);
+      }
+
+
+      document.getElementById("conteudo")
+        .textContent = texto;
+
+
+      document.getElementById("resultado")
+        .style.display = "block";
+
+
+      mensagem.textContent =
+        "Leitura concluída.";
+
+
+      leitor.stop()
+        .catch(function() {});
+
+
+      botao.textContent =
+        "QR LIDO";
+
+    },
+
+    function() {
+      // Ignora tentativas sem QR.
+    }
+
+  )
+
+  .then(function() {
+
+    botao.textContent =
+      "CÂMERA ATIVA";
+
+    mensagem.textContent =
+      "Aponte para o QR de identificação do bilhete.";
+
+  })
+
+  .catch(function(erro) {
+
+    botao.disabled = false;
+
+    botao.textContent =
+      "📷 TENTAR NOVAMENTE";
+
+    mensagem.innerHTML =
+      "Não foi possível abrir a câmera.<br><br>" +
+      "<b>Erro:</b> " +
+      String(erro);
+
+  });
+
+}
+
+</script>
+
+</body>
+</html>
